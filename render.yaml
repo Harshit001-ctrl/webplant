@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: mini-project-manager-api
+    runtime: node
+    plan: free
+    region: oregon
+    healthCheckPath: /api/health
+    buildCommand: npm ci
+    startCommand: npm run start:api
+    envVars:
+      - key: NODE_VERSION
+        value: 22.11.0
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_ORIGIN
+        sync: false
+
+  - type: web
+    name: mini-project-manager-web
+    runtime: node
+    plan: free
+    region: oregon
+    healthCheckPath: /
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run start:web
+    envVars:
+      - key: NODE_VERSION
+        value: 22.11.0
+      - key: API_URL
+        fromService:
+          name: mini-project-manager-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
